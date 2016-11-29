@@ -45,8 +45,8 @@ CameraROS::CameraROS(bool subscribeDepth, QObject * parent) :
 
 	if(!subscribeDepth_)
 	{
-		image_transport::ImageTransport it(nh);
-		imageSub_ = it.subscribe(nh.resolveName("image"), 1, &CameraROS::imgReceivedCallback, this);
+//		image_transport::ImageTransport it(nh);
+//		imageSub_ = it.subscribe(nh.resolveName("image"), 1, &CameraROS::imgReceivedCallback, this);
 	}
 	else
 	{
@@ -165,4 +165,17 @@ void CameraROS::imgDepthReceivedCallback(
 	}
 
 
+}
+
+void CameraROS::subscribeToCameraTopic()
+{
+	image_transport::ImageTransport it(nh);
+	imageSub_ = it.subscribe(nh.resolveName("image"), 1, &CameraROS::imgReceivedCallback, this);
+	ROS_INFO("find_object_ros: subscribe to camera topic!");
+}
+
+void CameraROS::unsubscribeFromCameraTopic()
+{
+	imageSub_.shutdown();
+	ROS_INFO("find_object_ros: unsubscribe from camera topic!");
 }

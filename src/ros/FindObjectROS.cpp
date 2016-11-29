@@ -43,8 +43,20 @@ FindObjectROS::FindObjectROS(const std::string & objFramePrefix, QObject * paren
 
 	ros::NodeHandle nh; // public
 
-	pub_ = nh.advertise<std_msgs::Float32MultiArray>("objects", 1);
-	pubStamped_ = nh.advertise<find_object_2d::ObjectsStamped>("objectsStamped", 1);
+	numOfSubscribers_objects = 0;
+	numOfSubscribers_objectsStamped = 0;
+
+	pub_ = nh.advertise<std_msgs::Float32MultiArray>("objects",
+							1,
+							boost::bind(&FindObjectROS::connectCallback, this, _1),
+							boost::bind(&FindObjectROS::disconnectCallback, this, _1),
+							ros::VoidConstPtr(), false);
+
+	pubStamped_ = nh.advertise<find_object_2d::ObjectsStamped>("objectsStamped",
+								1,
+								boost::bind(&FindObjectROS::connectCallback, this, _1),
+								boost::bind(&FindObjectROS::disconnectCallback, this, _1),
+								ros::VoidConstPtr(), false);
 
 	this->connect(this, SIGNAL(objectsFound(find_object::DetectionInfo)), this, SLOT(publish(find_object::DetectionInfo)));
 }
@@ -236,4 +248,53 @@ cv::Vec3f FindObjectROS::getDepth(const cv::Mat & depthImage,
 		pt.val[2] = depth*unit_scaling;
 	}
 	return pt;
+}
+
+
+void FindObjectROS::connectCallback(const ros::SingleSubscriberPublisher &pub)
+{
+	std::string topicName = pub.getTopic();
+
+	if(topicName == "/objects")
+	{
+		numOfSubscribers_objects = pub_.getNumSubscribers();
+	}
+	else if(topicName == "/objectsStamped")
+	{
+		numOfSubscribers_objectsStamped = pubStamped_.getNumSubscribers();
+	}
+
+	ROS_INFO("find_object_ros: \"%s\" subscribed to \"%s\" topic. "
+		"Subscribers on topics: \"\\objects\" : %d,  \"\\objectsStamped\" : %d ",
+		pub.getSubscriberName().c_str(), topicName.c_str(),
+		numOfSubscribers_objects, numOfSubscribers_objectsStamped);
+
+	if((numOfSubscribers_objects + numOfSubscribers_objectsStamped) == 1) // subscribe if it is the first subscriber
+	{
+		Q_EMIT subscribeToCameraTopic();
+	}
+}
+
+void FindObjectROS::disconnectCallback(const ros::SingleSubscriberPublisher &pub)
+{
+	std::string topicName = pub.getTopic();
+
+	if(topicName == "/objects")
+	{
+		numOfSubscribers_objects = pub_.getNumSubscribers();
+	}
+	else if(topicName == "/objectsStamped")
+	{
+		numOfSubscribers_objectsStamped = pubStamped_.getNumSubscribers();
+	}
+
+	ROS_INFO("find_object_ros: \"%s\" unsubscribed from \"%s\" topic. "
+		"Subscribers on topics: \"\\objects\" : %d,  \"\\objectsStamped\" : %d ",
+		pub.getSubscriberName().c_str(), topicName.c_str(),
+		numOfSubscribers_objects, numOfSubscribers_objectsStamped);
+
+	if((numOfSubscribers_objects + numOfSubscribers_objectsStamped) == 0) // unsubscribe if neither of the topics have subscriber
+	{
+		Q_EMIT unsubscribeFromCameraTopic();
+	}
 }

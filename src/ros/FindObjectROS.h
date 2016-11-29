@@ -47,6 +47,10 @@ public:
 	FindObjectROS(const std::string & objPrefix, QObject * parent = 0);
 	virtual ~FindObjectROS() {}
 
+Q_SIGNALS:
+	void subscribeToCameraTopic();
+	void unsubscribeFromCameraTopic();
+
 public Q_SLOTS:
 	void publish(const find_object::DetectionInfo & info);
 
@@ -73,6 +77,10 @@ private:
 
 	std::string objFramePrefix_;
 	tf::TransformBroadcaster tfBroadcaster_;
+
+	int numOfSubscribers_objects, numOfSubscribers_objectsStamped;
+	void connectCallback(const ros::SingleSubscriberPublisher& pub);
+	void disconnectCallback(const ros::SingleSubscriberPublisher& pub);
 
 };
 
