@@ -62,6 +62,10 @@ Q_SIGNALS:
 			const cv::Mat & depth,
 			float depthConstant);
 
+public Q_SLOTS:
+	void subscribeToCameraTopic();
+	void unsubscribeFromCameraTopic();
+
 private Q_SLOTS:
 	virtual void takeImage();
 
@@ -75,6 +79,7 @@ private:
 private:
 	bool subscribeDepth_;
 	image_transport::Subscriber imageSub_;
+	ros::NodeHandle nh;
 
 	image_transport::SubscriberFilter rgbSub_;
 	image_transport::SubscriberFilter depthSub_;

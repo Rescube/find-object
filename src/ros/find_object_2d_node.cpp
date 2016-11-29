@@ -144,6 +144,16 @@ int main(int argc, char** argv)
 			findObjectROS,
 			SLOT(setDepthData(const std::string &, const ros::Time &, const cv::Mat &, float)));
 
+	QObject::connect(findObjectROS,
+			SIGNAL(subscribeToCameraTopic()),
+			camera,
+			SLOT(subscribeToCameraTopic()));
+
+	QObject::connect(findObjectROS,
+			SIGNAL(unsubscribeFromCameraTopic()),
+			camera,
+			SLOT(unsubscribeFromCameraTopic()));
+
 	// Catch ctrl-c to close the gui
 	setupQuitSignal(gui);
 
