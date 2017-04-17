@@ -254,20 +254,18 @@ cv::Vec3f FindObjectROS::getDepth(const cv::Mat & depthImage,
 
 void FindObjectROS::connectCallback(const ros::SingleSubscriberPublisher &pub)
 {
-	std::string topicName = pub.getTopic();
-
-	if(topicName == "/objects")
+	if(pub.getTopic() == pub_.getTopic())
 	{
 		numOfSubscribers_objects = pub_.getNumSubscribers();
 	}
-	else if(topicName == "/objectsStamped")
+	else if(pub.getTopic() == pubStamped_.getTopic())
 	{
 		numOfSubscribers_objectsStamped = pubStamped_.getNumSubscribers();
 	}
 
 	ROS_INFO("find_object_ros: \"%s\" subscribed to \"%s\" topic. "
 		"Subscribers on topics: \"\\objects\" : %d,  \"\\objectsStamped\" : %d ",
-		pub.getSubscriberName().c_str(), topicName.c_str(),
+		pub.getSubscriberName().c_str(), pub.getTopic().c_str(),
 		numOfSubscribers_objects, numOfSubscribers_objectsStamped);
 
 	if((numOfSubscribers_objects + numOfSubscribers_objectsStamped) == 1) // subscribe if it is the first subscriber
@@ -278,20 +276,18 @@ void FindObjectROS::connectCallback(const ros::SingleSubscriberPublisher &pub)
 
 void FindObjectROS::disconnectCallback(const ros::SingleSubscriberPublisher &pub)
 {
-	std::string topicName = pub.getTopic();
-
-	if(topicName == "/objects")
+	if(pub.getTopic() == pub_.getTopic())
 	{
 		numOfSubscribers_objects = pub_.getNumSubscribers();
 	}
-	else if(topicName == "/objectsStamped")
+	else if(pub.getTopic() == pubStamped_.getTopic())
 	{
 		numOfSubscribers_objectsStamped = pubStamped_.getNumSubscribers();
 	}
 
 	ROS_INFO("find_object_ros: \"%s\" unsubscribed from \"%s\" topic. "
 		"Subscribers on topics: \"\\objects\" : %d,  \"\\objectsStamped\" : %d ",
-		pub.getSubscriberName().c_str(), topicName.c_str(),
+		pub.getSubscriberName().c_str(), pub.getTopic().c_str(),
 		numOfSubscribers_objects, numOfSubscribers_objectsStamped);
 
 	if((numOfSubscribers_objects + numOfSubscribers_objectsStamped) == 0) // unsubscribe if neither of the topics have subscriber
