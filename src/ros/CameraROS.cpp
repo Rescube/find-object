@@ -122,9 +122,16 @@ void CameraROS::imgReceivedCallback(const sensor_msgs::ImageConstPtr & msg)
 			Q_EMIT rosDataReceived(msg->header.frame_id, msg->header.stamp, cv::Mat(), 0.0f);
 			Q_EMIT imageReceived(bgr);
 		}
+		else if(msg->encoding.compare(sensor_msgs::image_encodings::MONO8) == 0)
+		{
+			cv::Mat bgr;
+			cv::cvtColor(ptr->image, bgr, cv::COLOR_GRAY2BGR);
+			Q_EMIT rosDataReceived(msg->header.frame_id, msg->header.stamp, cv::Mat(), 0.0f);
+			Q_EMIT imageReceived(bgr);
+		}
 		else
 		{
-			ROS_ERROR("find_object_ros: Encoding \"%s\" detected. Supported image encodings are bgr8 and rgb8...", msg->encoding.c_str());
+			ROS_ERROR("find_object_ros: Encoding \"%s\" detected. Supported image encodings are bgr8, rgb8 and mono8...", msg->encoding.c_str());
 		}
 	}
 }
